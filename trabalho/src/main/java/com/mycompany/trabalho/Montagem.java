@@ -7,6 +7,8 @@ package com.mycompany.trabalho;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -182,6 +184,29 @@ class Montagem {
             
         } else if(linha.startsWith("lw")) {
             
+            // opcode dec 35
+            // opcode hex 23
+            // func dec 0
+            int opcode = 35;
+            int funct = 0;
+            
+            String destino = linha.substring(3).trim();
+            
+            String p[] = destino.split(",");
+            
+            Pattern pattern = Pattern.compile("([0-9]+)\\((\\$[a-z0-9]{2,4})\\)");
+            Matcher matcher = pattern.matcher(p[1].trim());
+            matcher.find();
+            
+            int offset = Integer.parseInt(matcher.group(1));
+                    
+            int rt = ph.translateRegister(p[0]);     // segundo operando
+            int rd = 0;     // destino 
+            int rs = ph.translateRegister(matcher.group(2).trim());     // primeiro operando
+            int shamt = 0;  // 
+            
+            saida = montaInstrucaoL(opcode, rs, rt, offset);
+            
         } else if(linha.startsWith("beq")) {
             
         } else if(linha.startsWith("blez")) {
@@ -265,6 +290,26 @@ class Montagem {
         
         // func 5-0 6 bits
         binario.append(ph.padLeftZeros(ph.intToBin(func), 6));
+        
+        String bin = binario.toString();
+        
+        return ph.binToHex(bin);
+    }
+
+    private String montaInstrucaoL(int opcode, int rs, int rt, int offset) {
+         StringBuilder binario = new StringBuilder();
+        
+        ParseHelper ph = new ParseHelper();
+        
+        // opcode
+        binario.append(ph.padLeftZeros(ph.intToBin(opcode), 6));
+        
+        binario.append(ph.padLeftZeros(ph.intToBin(rs), 5));
+        
+        binario.append(ph.padLeftZeros(ph.intToBin(rt), 5));
+        
+        // destino
+        binario.append(ph.padLeftZeros(ph.intToBin(offset),16));
         
         String bin = binario.toString();
         
