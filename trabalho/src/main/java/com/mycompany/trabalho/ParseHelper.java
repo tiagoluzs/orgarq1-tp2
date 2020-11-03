@@ -14,8 +14,14 @@ import java.util.HashMap;
 public class ParseHelper {
     
     static HashMap regTable;
-
-    public ParseHelper() {
+    
+    private static ParseHelper instance;
+    
+    private ParseHelper() {
+        
+    }
+    
+    static {
         regTable = new HashMap();
         regTable.put("$zero", 0);
         regTable.put("$at", 1);
@@ -50,8 +56,13 @@ public class ParseHelper {
         regTable.put("$fp", 30);
         regTable.put("$ra", 31);
     }
-        
     
+    public static ParseHelper getInstance() {
+        if(instance == null) {
+            instance = new ParseHelper();
+        }
+        return instance;
+    }
         
     public String[] breakLines(String content) {
         return content.split("\n");
@@ -62,17 +73,24 @@ public class ParseHelper {
         return (int)regTable.get(reg.trim());
     }
     
-    public String padLeftZeros(String inputString, int length) {
+    public String padLeft(String inputString, int length, char pad) {
         if (inputString.length() >= length) {
-            return inputString;
+            return inputString.substring(inputString.length() - length);
         }
         StringBuilder sb = new StringBuilder();
         while (sb.length() < length - inputString.length()) {
-            sb.append('0');
+            sb.append(pad);
         }
         sb.append(inputString);
-
         return sb.toString();
+    }
+    
+    public String padLeftZeros(String inputString, int length) {
+        return this.padLeft(inputString, length, '0');
+    }
+    
+    public String padLeftOnes(String inputString, int length) {
+        return this.padLeft(inputString, length, '1');
     }
     
     public String intToBin(int val) {
