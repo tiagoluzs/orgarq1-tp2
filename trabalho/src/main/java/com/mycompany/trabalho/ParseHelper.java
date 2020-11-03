@@ -1,18 +1,30 @@
+/**
+ * Trabalho de Arquitetura e Organização de Computadores 1
+ * Grupo: Tiago Luz e Arthur Ávila
+ */
 package com.mycompany.trabalho;
 
 import java.util.HashMap;
-
+/**
+ * classe com métodos auxiliares para parsing dos arquivos
+ * @author tiagoluz
+ */
 public class ParseHelper {
     
+    // dicionário registrador->indice
     static final HashMap<String,Integer> regTable;
+    
+    // dicionário indice->registrador
     static final HashMap<Integer,String> regTableInd;
     
+    // Singleton Design Pattern
     private static ParseHelper instance;
     
     private ParseHelper() {
         
     }
     
+    // popula dicionários
     static {
         regTable = new HashMap<>();
         regTableInd = new HashMap<>();
@@ -82,27 +94,26 @@ public class ParseHelper {
         regTableInd.put(31,"$ra");
     }
     
+    // chamada singleton para esta classe
     public static ParseHelper getInstance() {
         if(instance == null) {
             instance = new ParseHelper();
         }
         return instance;
     }
-        
-    public String[] breakLines(String content) {
-        return content.split("\n");
-    }
     
-    
+    // traduz nome do registrador para indice
     public int translateRegister(String reg) {
         return (int)regTable.get(reg.trim());
     }
     
+    // traduz indice para nome do registrador
     public String translateRegister(int ind) {
         return regTableInd.get(ind).toString();
     }
     
-    public String padLeft(String inputString, int length, char pad) {
+    // preenche caracteres à esquerda
+    private String padLeft(String inputString, int length, char pad) {
         if (inputString.length() >= length) {
             return inputString.substring(inputString.length() - length);
         }
@@ -114,18 +125,30 @@ public class ParseHelper {
         return sb.toString();
     }
     
+    // wraper para padLeft
     public String padLeftZeros(String inputString, int length) {
         return this.padLeft(inputString, length, '0');
     }
     
+    // wraper para padLeft
     public String padLeftOnes(String inputString, int length) {
         return this.padLeft(inputString, length, '1');
     }
     
+    /**
+     * converte inteiro para binário complemento de 2
+     * @param val inteiro signed
+     * @return 
+     */
     public String intToBin(int val) {
         return Integer.toBinaryString(val);
     }
     
+    /**
+     * converte binário para hexadecimal e retorna no formato 0xA0
+     * @param val binario no formato 00101001
+     * @return 
+     */
     public String binToHex(String val) {
         StringBuilder sb = new StringBuilder();
         for(int i = 0; i < val.length(); i+=4) {
@@ -135,11 +158,21 @@ public class ParseHelper {
         }
         return "0x"+sb.toString();
     }
-
+    
+    /**
+     * converte binário para inteiro unsigned
+     * @param string do binário no formato 00010101
+     * @return 
+     */
     int binToInt(String val) {
         return Integer.parseInt(val,2);
     }
      
+    /**
+     * Converte hexa para binário 
+     * @param val string do numero hexadecimal. aceita com ou sem prefixo 0x. 
+     * @return 
+     */
     String hexToBin(String val) {
         StringBuilder sb = new StringBuilder();
         if(val.startsWith("0x")) {
@@ -152,6 +185,13 @@ public class ParseHelper {
         return sb.toString();
     }
 
+    /**
+     * converte o binário para inteiro já tratando se for complemento de 2 positivo
+     * ou negativo. 
+     * @param binario
+     * @return 
+     */
+    
     int trataOffset(String binario) {
         int i = Integer.parseInt(binario,2);
         if(binario.startsWith("1")) {

@@ -1,5 +1,12 @@
+/**
+ * Trabalho de Arquitetura e Organização de Computadores 1
+ * Grupo: Tiago Luz e Arthur Ávila
+ */
 package com.mycompany.trabalho;
 
+/**
+ * classe para transporte de dados da instrução na desmontagem
+ */
 public class Instrucao {
     int opcode;
     int func;

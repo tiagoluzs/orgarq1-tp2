@@ -1,3 +1,7 @@
+/**
+ * Trabalho de Arquitetura e Organização de Computadores 1
+ * Grupo: Tiago Luz e Arthur Ávila
+ */
 package com.mycompany.trabalho;
 
 import java.util.ArrayList;
@@ -20,39 +24,64 @@ class Montagem {
     }
     
     public void run() {
+        // classe helper para parsing
         parseHelper = ParseHelper.getInstance();
-        String linhas[] = parseHelper.breakLines(content);
+        
+        // quebra as linhas do conteúdo em um array
+        String linhas[] = content.split("\n");
+        
+        // cria um dicionário para eventuais lebels do assembly
+        // nomeDaLabel->linha 
+        // será preenchido no início de cada linha no final do método
         labels = new HashMap<>();
+        
+        // stringbuilder onde as instruções serão montadas 
         StringBuilder sb = new StringBuilder();
+        
+        // lista das linhas válidas
+        // aka: removidas linhas vazias, .text, .global, etc.
         ArrayList<String> linhasValidas = new ArrayList<String>();
         int contadorLinha = 0;
         for(int i = 0; i < linhas.length; i++) {
+            // tira quebras e espaços desnecessários
             String linha = linhas[i].trim();
             
+            // remove linha vazia
             if(linha.length() == 0) {
                 continue;
             }
+            
             // se for .text, remove string e segue
             if(isInicioText(linha)) {
                 linha = linha.substring(".text".length()).trim();
-            }            
+            }
+            
+            // se alinha estiver vazia neste ponto, remove
             if(linha.length() == 0) {
                 continue;
             }
+            
+            // se for um label, registra no dicionário o nome do label
+            // e a linha que se encontra e já remove do código
+            // O dicionário será usado depois para vazer a ligação das labels
+            // e as respectivas linhas
             if(isLabel(linha)) {
                 String label = linha.substring(0, linha.indexOf(":"));
                 linha = linha.substring(linha.indexOf(":")+1).trim();
+                // cria entrada no dicionário para a nova label
                 labels.put(label, contadorLinha);
-            }
+            } 
             
             linhasValidas.add(linha);
             
             contadorLinha++;
         }
         contadorLinha = 0;
+        
+        // varre as linhas válidas e mota a instrução de cada uma delas
+        // no método montaLinha()
         for(String linha : linhasValidas) {
-            String l = montaLinha(linha, contadorLinha);
-            sb.append(l);
+            sb.append(montaLinha(linha, contadorLinha));
             sb.append("\n");
             contadorLinha++;
         }
@@ -64,6 +93,11 @@ class Montagem {
         return this.contentMontado;
     }
     
+    /**
+     * retorna o número do label ou zero se o label não existir no dicionário
+     * @param destino nome do lebel
+     * @return número da linha
+     */
     int getLabelNum(String destino) {
         Object o = labels.get(destino);
         if(o == null) {
@@ -72,29 +106,39 @@ class Montagem {
             return (int)o;
         }
     }
-
+    
+    /**
+     * montagem da linha de instrução
+     * @param linha instrução
+     * @param numeroLinha número da linha no arquivo (entre linhas válidas)
+     * @return 
+     */
     public String montaLinha(String linha, int numeroLinha) {
         String saida = null;
         linha = linha.trim();        
         int inicio = Integer.parseInt("400000",16); // inicio do programa 0x00400000
+        
+        // pega a instrução da linha
         String instrucao = linha.substring(0,linha.indexOf(" "));
         int opcode, func, funct, rs, rt, rd, shamt, offset,n,imediato;
-        String destino;
         String p[];
+        String parametros = linha.substring(instrucao.length()+1).trim();
+        
+        // para cada instrução chama a montagem correspondente
+        // de acordo com o tipo de instrução
         switch(instrucao) {
             case "jal":
                 opcode = 3;
                 func = 0;
-                destino = linha.substring(4).trim();
-                n = getLabelNum(destino);
+                n = getLabelNum(parametros);
                 int enderecoDestino = inicio + (n*4);
                 saida = montaInstrucaoJ(opcode,enderecoDestino);
             break;
             case "jr":
                 opcode = 0;
                 func = 8;
-                destino = linha.substring(3).trim();
-                rs = parseHelper.translateRegister(destino);
+                // traduz o nome do registrador para o indice
+                rs = parseHelper.translateRegister(parametros);
                 rt = 0;
                 rd = 0;
                 shamt = 0;
@@ -103,9 +147,10 @@ class Montagem {
             case "sll":
                 opcode = 0;
                 funct = 0;
-                destino = linha.substring(3).trim();
-                p = destino.split(",");
+                p = parametros.split(","); // quebra parâmetros por ,
                 rs = 0;
+                
+                // traduz o nome dos registradores para os respectivos índices
                 rt = parseHelper.translateRegister(p[1]);     
                 rd = parseHelper.translateRegister(p[0]);     
                 shamt = Integer.parseInt(p[2].trim());
@@ -113,8 +158,9 @@ class Montagem {
                 break;
             case "slti":
                 opcode = 10;
-                destino = linha.substring(4).trim();
-                p = destino.split(",");
+                p = parametros.split(",");// quebra parâmetros por ,
+                
+                // traduz o nome dos registradores para os respectivos índices
                 rs = parseHelper.translateRegister(p[1]);     
                 rt = parseHelper.translateRegister(p[0]);     
                 shamt = Integer.parseInt(p[2].trim());
@@ -123,8 +169,9 @@ class Montagem {
             case "div":
                 opcode = 0;
                 funct = 26;
-                destino = linha.substring(4).trim();           
-                p = destino.split(",");
+                p = parametros.split(",");// quebra parâmetros por ,
+                
+                // traduz o nome dos registradores para os respectivos índices
                 rs = parseHelper.translateRegister(p[0]);
                 rt = parseHelper.translateRegister(p[1]);
                 rd = 0;
@@ -134,12 +181,14 @@ class Montagem {
             case "lw":
                 opcode = 35;
                 funct = 0;
-                destino = linha.substring(3).trim();
-                p= destino.split(",");
+                p= parametros.split(",");// quebra parâmetros por ,
                 Pattern pattern = Pattern.compile("([0-9]+)\\((\\$[a-z0-9]{2,4})\\)");
                 Matcher matcher = pattern.matcher(p[1].trim());
                 matcher.find();
+                
                 offset = Integer.parseInt(matcher.group(1));
+                
+                // traduz o nome dos registradores para os respectivos índices
                 rt = parseHelper.translateRegister(p[0]);
                 rs = parseHelper.translateRegister(matcher.group(2).trim());
                 saida = montaInstrucaoL(opcode, rs, rt, offset);
@@ -147,10 +196,11 @@ class Montagem {
             case "beq":
                 opcode = 4;
                 func = 0;
-                destino = linha.substring(4).trim();
                 Pattern pattern2 = Pattern.compile("(\\$[a-z0-9]+)\\ *,\\ *(\\$[a-z0-9]+)\\ *,\\ *([a-z0-9]*)");
-                Matcher matcher2 = pattern2.matcher(destino);
+                Matcher matcher2 = pattern2.matcher(parametros);
                 matcher2.find();
+                
+                // traduz o nome dos registradores para os respectivos índices
                 rt = parseHelper.translateRegister(matcher2.group(2));
                 rs = parseHelper.translateRegister(matcher2.group(1));     
                 n = (int)labels.get(matcher2.group(3));
@@ -160,11 +210,13 @@ class Montagem {
             case "blez":
                 opcode = 6;
                 func = 0;
-                destino = linha.substring(4).trim();
+                
+                // regex dos parâmetros paseados nos grupos para registrador, label
                 Pattern pattern3 = Pattern.compile("(\\$[a-z0-9]+)\\ *,\\ *([a-z0-9]*)");
-                Matcher matcher3 = pattern3.matcher(destino);
+                Matcher matcher3 = pattern3.matcher(parametros);
                 matcher3.find();
                 rt = 0;
+                // traduz o nome do registrador para o índice
                 rs = parseHelper.translateRegister(matcher3.group(1));            
                 n = (int)labels.get(matcher3.group(2));
                 offset = n - (numeroLinha + 1);
@@ -172,18 +224,20 @@ class Montagem {
                 break;
             case "ori":
                 opcode = 13;
-                destino = linha.substring(4).trim();
-                p = destino.split(",");
-                rs = parseHelper.translateRegister(p[1]);     
-                rt = parseHelper.translateRegister(p[0]);     
+                p = parametros.split(",");// quebra parâmetros por ,
+                
+                // traduz o nome dos registradores para os respectivos índices
+                rs = parseHelper.translateRegister(p[1]);    
+                rt = parseHelper.translateRegister(p[0]);
                 imediato = Integer.parseInt(p[2].trim());
                 saida = montaInstrucaoI(opcode, rs, rt, imediato);
                 break;
             case "nor":
                 opcode = 0;
                 func = 39;
-                destino = linha.substring(4).trim();
-                p = destino.split(",");
+                p = parametros.split(",");// quebra parâmetros por ,
+                
+                // traduz o nome dos registradores para os respectivos índices
                 rs = parseHelper.translateRegister(p[1]);     
                 rt = parseHelper.translateRegister(p[2]);     
                 rd = parseHelper.translateRegister(p[0]);     
@@ -197,16 +251,34 @@ class Montagem {
         
         return saida;
     }
-
+    
+    /**
+     * verifica se é uma linha com label
+     * @param linha
+     * @return 
+     */
     private boolean isLabel(String linha) {
         // verifica se tem ou é um label
         return linha.matches("^.+:.*$");
     }
 
+    /**
+     * verifica se é a linha do .text
+     * @param linha
+     * @return 
+     */
     private boolean isInicioText(String linha) {
         return linha.startsWith(".text");
     }
 
+    /**
+     * monta a linha das instruções do tipo I
+     * @param opcode opcode da operação
+     * @param rs indice do registrador
+     * @param rt indice do registrador 
+     * @param imediato inteiro do imediato
+     * @return 
+     */
     public String montaInstrucaoI(int opcode, int rs, int rt, int imediato) {
         StringBuilder binario = new StringBuilder();
         // opcode 31-26 6 bits
@@ -220,15 +292,32 @@ class Montagem {
         String bin = binario.toString();        
         return parseHelper.binToHex(bin);
     }
-
+    
+    /**
+     * monta a linha das instruções do tipo J (jal)
+     * @param opcode códido da operação
+     * @param destino endereço de destino da instrução, partindo de 0x00400000
+     * @return 
+     */
     public String montaInstrucaoJ(int opcode, int destino) {
         StringBuilder binario = new StringBuilder();
         binario.append(parseHelper.padLeftZeros(parseHelper.intToBin(opcode), 6));
+        // tira os primeiros 4 dígitos e os últimos dois dígitos pois são irrelevantes
         binario.append(parseHelper.padLeftZeros(parseHelper.intToBin(destino),32).substring(4, 30));
         String bin = binario.toString();
         return parseHelper.binToHex(bin);
     }
     
+    /**
+     * monta a linha das instruções do tipo R 
+     * @param opcode opcode da operação
+     * @param rs indice do registrador rs
+     * @param rt indice do registrador rt
+     * @param rd indice do registrador rd
+     * @param shamt inteiro do shamt 
+     * @param func func da operação quando opcode = 0
+     * @return 
+     */
     private String montaInstrucaoR(int opcode, int rs, int rt, int rd, int shamt, int func) {
         StringBuilder binario = new StringBuilder();
         // opcode 31-26 6 bits
@@ -247,6 +336,14 @@ class Montagem {
         return parseHelper.binToHex(bin);
     }
 
+    /**
+     * 
+     * @param opcode opcode da operação
+     * @param rs indice do registrador rs
+     * @param rt indice do registrador rt
+     * @param offset int do offset 
+     * @return 
+     */
     private String montaInstrucaoL(int opcode, int rs, int rt, int offset) {
         StringBuilder binario = new StringBuilder();
         binario.append(parseHelper.padLeftZeros(parseHelper.intToBin(opcode), 6));
