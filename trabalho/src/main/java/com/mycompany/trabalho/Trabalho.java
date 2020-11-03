@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.trabalho;
 
 import java.io.File;
@@ -10,36 +5,26 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- *
- * @author tiagoluz
- */
 public class Trabalho {
     public static void main(String args[]) {
-        if(args.length != 3) {
-            printHelp();
+        
+        if(!args[0].equals("ajuda") && args.length != 3) {
+            printHelp(true);
             System.exit(-1);
         }
         
-        if(!args[0].equals("monta") && !args[0].equals("desmonta")) {
-            printHelp();
+        if(!args[0].equals("ajuda") && !args[0].equals("monta") && !args[0].equals("desmonta")) {
+            printHelp(true);
             System.exit(-1);
         }
         
         String operacao = args[0];
-        String origem = args[1];
-        String destino = args[2];
         
         switch(operacao) {
-            case "monta":
-                monta(origem,destino);
-                break;
-            case "desmonta":
-                desmonta(origem,destino);
-                break;
+            case "ajuda" -> printHelp(false);
+            case "monta" -> monta(args[1],args[2]);
+            case "desmonta" -> desmonta(args[1],args[2]);
         }
     }
     
@@ -102,13 +87,22 @@ public class Trabalho {
     }
     
     public static void printHelp() {
-        System.out.println("Parâmetros incorretos. ");
+        printHelp(true);
+    }
+    
+    public static void printHelp(boolean erro) {
+        System.out.println("\n\nTrabalho de Arquitetura e Organização de Computadores 1");
+        System.out.println("=======================================================\n");        
+        System.out.println("Grupo: Tiago Luz e Arthur Ávila\n");
+        if(erro)
+            System.out.println("ERRO: Parâmetros informados incorretos. \n");
+        System.out.println("Exemplos de execução:\n");
+        System.out.println("java -jar trabalho.jar ajuda");
         System.out.println("java -jar trabalho.jar monta arquivo_entrada.asm arquivo_saida.asm");
         System.out.println("java -jar trabalho.jar monta arquivo_entrada.asm -stdout");
-
         System.out.println("java -jar trabalho.jar desmonta arquivo_entrada.asm arquivo_saida.asm");
         System.out.println("java -jar trabalho.jar desmonta arquivo_entrada.asm -stdout");
-
+        System.out.println("\n\n");
     }
 
     private static void executaSaida(String content, String destino) {

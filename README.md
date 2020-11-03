@@ -6,6 +6,11 @@
 
 O jar deve ter sido criado dentro da pasta release.  
 
+
+**Para exibir as opções de execução (ajuda):**
+
+    ~# java -jar ajuda
+
 **Para executar a montagem e escrever na saída padrão (STDOUT):**
 
     ~# java -jar monta <ARQUIVO_COM_INSTRUCOES_ASSEMBLY.asm> -stdout
