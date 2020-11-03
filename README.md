@@ -18,7 +18,7 @@ O jar deve ter sido criado dentro da pasta release.
 
     ~# java -jar desmonta <ARQUIVO_COM_INSTRUCOES_HEXA.asm> -stdout  
 
-**Para executar a montagem e escrever a saída em um arquivo:**
+**Para executar a desmontagem e escrever a saída em um arquivo:**
 
     ~# java -jar desmonta <ARQUIVO_COM_INSTRUCOES_HEXA.asm> <ARQUIVO_SAIDA.asm>
 
