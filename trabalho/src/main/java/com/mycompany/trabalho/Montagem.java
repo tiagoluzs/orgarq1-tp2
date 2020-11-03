@@ -15,6 +15,7 @@ class Montagem {
     String contentMontado;
     
     ParseHelper parseHelper;
+    HashMap labels;
     
     public Montagem() {}
     
@@ -26,7 +27,7 @@ class Montagem {
     public void run() {
         parseHelper = ParseHelper.getInstance();
         String linhas[] = parseHelper.breakLines(content);
-        HashMap labels = new HashMap();
+        labels = new HashMap();
         StringBuilder sb = new StringBuilder();
         ArrayList<String> linhasValidas = new ArrayList<String>();
         int contadorLinha = 0;
@@ -55,7 +56,7 @@ class Montagem {
         }
         contadorLinha = 0;
         for(String linha : linhasValidas) {
-            String l = montaLinha(linha,labels, contadorLinha);
+            String l = montaLinha(linha, contadorLinha);
             sb.append(l);
             sb.append("\n");
             contadorLinha++;
@@ -67,8 +68,17 @@ class Montagem {
     public String toString() {
         return this.contentMontado;
     }
+    
+    int getLabelNum(String destino) {
+        Object o = labels.get(destino);
+        if(o == null) {
+            return 0;
+        } else {
+            return (int)o;
+        }
+    }
 
-    public String montaLinha(String linha, HashMap labels, int numeroLinha) {
+    public String montaLinha(String linha, int numeroLinha) {
         String saida = null;
         linha = linha.trim();        
         int inicio = Integer.parseInt("400000",16); // inicio do programa 0x00400000
@@ -81,7 +91,7 @@ class Montagem {
                 opcode = 3;
                 func = 0;
                 destino = linha.substring(4).trim();
-                n = (int)labels.get(destino);
+                n = getLabelNum(destino);
                 int enderecoDestino = inicio + (n*4);
                 saida = montaInstrucaoJ(opcode,enderecoDestino);
             break;
