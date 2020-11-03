@@ -9,9 +9,8 @@ class Montagem {
 
     String content;
     String contentMontado;
-    
     ParseHelper parseHelper;
-    HashMap labels;
+    HashMap<String,Integer> labels;
     
     public Montagem() {}
     
@@ -23,7 +22,7 @@ class Montagem {
     public void run() {
         parseHelper = ParseHelper.getInstance();
         String linhas[] = parseHelper.breakLines(content);
-        labels = new HashMap();
+        labels = new HashMap<>();
         StringBuilder sb = new StringBuilder();
         ArrayList<String> linhasValidas = new ArrayList<String>();
         int contadorLinha = 0;

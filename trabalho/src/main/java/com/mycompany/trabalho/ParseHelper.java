@@ -4,8 +4,8 @@ import java.util.HashMap;
 
 public class ParseHelper {
     
-    static HashMap regTable;
-    static HashMap regTableInd;
+    static final HashMap<String,Integer> regTable;
+    static final HashMap<Integer,String> regTableInd;
     
     private static ParseHelper instance;
     
@@ -14,9 +14,8 @@ public class ParseHelper {
     }
     
     static {
-        regTable = new HashMap();
-        regTableInd = new HashMap();
-        
+        regTable = new HashMap<>();
+        regTableInd = new HashMap<>();
         regTable.put("$zero", 0);
         regTable.put("$at", 1);
         regTable.put("$v0", 2);

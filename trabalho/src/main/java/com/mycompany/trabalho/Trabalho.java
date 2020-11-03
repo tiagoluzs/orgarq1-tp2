@@ -108,6 +108,9 @@ public class Trabalho {
         System.out.println("java -jar trabalho.jar desmonta arquivo_entrada.asm arquivo_saida.asm");
         System.out.println("java -jar trabalho.jar desmonta arquivo_entrada.asm -stdout");
         System.out.println("\n\n");
+        System.out.println("Para executar os arquivos de exemplo (dentro da pasta release):");
+        System.out.println("java -jar trabalho.jar monta ../trabalho/exemplo_entrada_assembly.asm -stdout");
+        System.out.println("java -jar trabalho.jar desmonta ../trabalho/exemplo_desmontagem.asm -stdout");
     }
 
     private static void executaSaida(String content, String destino) {
@@ -116,6 +119,7 @@ public class Trabalho {
             System.out.println(content);
             System.exit(0);
         } else {
+            content = content + "\n";
             try {
                 File f = new File(destino);
                 FileWriter fw = new FileWriter(f);
