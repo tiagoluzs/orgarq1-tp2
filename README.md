@@ -21,3 +21,13 @@ O jar deve ter sido criado dentro da pasta release.
 **Para executar a montagem e escrever a saída em um arquivo:**
 
     ~# java -jar desmonta <ARQUIVO_COM_INSTRUCOES_HEXA.asm> <ARQUIVO_SAIDA.asm>
+
+
+**Para executar os arquivos de exemplo dados pelo enunciado do trabalho:**
+
+    ~# cd release
+    ~# java -jar trabalho.jar monta ../trabalho/exemplo_entrada_assembly.asm -stdout
+    ~# java -jar trabalho.jar desmonta ../trabalho/exemplo_desmontagem.asm -stdout
+
+
+
