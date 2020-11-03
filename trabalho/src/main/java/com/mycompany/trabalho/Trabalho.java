@@ -9,6 +9,11 @@ import java.io.IOException;
 public class Trabalho {
     public static void main(String args[]) {
         
+        if(args.length == 0) {
+            printHelp(true);
+            System.exit(-1);
+        }
+        
         if(!args[0].equals("ajuda") && args.length != 3) {
             printHelp(true);
             System.exit(-1);
