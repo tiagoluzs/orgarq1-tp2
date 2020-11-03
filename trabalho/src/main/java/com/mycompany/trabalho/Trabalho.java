@@ -111,6 +111,7 @@ public class Trabalho {
     }
 
     private static void executaSaida(String content, String destino) {
+        content = content.trim();
         if(destino.equals("-stdout")) {
             System.out.println(content);
             System.exit(0);
