@@ -1,16 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.mycompany.trabalho;
 
 import java.util.HashMap;
 
-/**
- *
- * @author tiagoluz
- */
 public class Desmontagem {
     
     String content;
@@ -24,8 +15,6 @@ public class Desmontagem {
         run();
     }
     
-    
-    
     public void run() {
         parseHelper = ParseHelper.getInstance();
         String linhas[] = parseHelper.breakLines(content);
@@ -38,91 +27,60 @@ public class Desmontagem {
         for(int i = 0; i < linhas.length; i++) {
             String linha = linhas[i].trim();
             String binario = parseHelper.hexToBin(linha);
-            int opcode = parseHelper.binToInt(binario.substring(0, 6)); 
-            int func = parseHelper.binToInt(binario.substring(26, 32)); 
-            String instrucao = getInstrucao(opcode, func);
+            Instrucao instrucao = desmontaDeBinario(binario);            
             if(instrucao == null) {
                 System.out.println("Instrução inválida na linha " + (i + 1));
                 System.exit(-1);
             }
-            sb.append(instrucao);
-            sb.append(" ");
             String parametros = "";
             String rs, rt, rd;
             int offset, imediato;
-            
-            switch(opcode) {
+            switch(instrucao.opcode) {
                 case 0: 
-                    switch(func) {
+                    switch(instrucao.func) {
                         case 8: // jr
-                            rs = parseHelper.translateRegister(Integer.parseInt(binario.substring(6,11),2));
-                            parametros = rs;
+                            parametros = instrucao.rs;
                         break;
                         case 26: // div
-                            rs = parseHelper.translateRegister(Integer.parseInt(binario.substring(6,11),2));
-                            rt = parseHelper.translateRegister(Integer.parseInt(binario.substring(11,16),2));
-                            parametros = rs + "," + rt;
+                            parametros = instrucao.rs + "," + instrucao.rt;
                             break;
                         case 39: // nor
-                            rs = parseHelper.translateRegister(Integer.parseInt(binario.substring(6,11),2));
-                            rt = parseHelper.translateRegister(Integer.parseInt(binario.substring(11,16),2));
-                            rd = parseHelper.translateRegister(Integer.parseInt(binario.substring(16,21),2));
-                            parametros = rd + "," + rs + "," + rt;
+                            parametros = instrucao.rd + "," + instrucao.rs + "," + instrucao.rt;
                             break;
                         case 0: // sll
-                            rt = parseHelper.translateRegister(Integer.parseInt(binario.substring(11,16),2));
-                            rd = parseHelper.translateRegister(Integer.parseInt(binario.substring(16,21),2));
-                            int shamt = parseHelper.trataOffset(binario.substring(21,26));
-                            parametros = rd + "," + rt + "," + shamt;
+                            parametros = instrucao.rd + "," + instrucao.rt + "," + instrucao.shamt;
                             break;
                         default:
-                            System.out.println("O código de função da instrução informado é inválido ou não foi implementado. (opcode: "+opcode+" func: "+func+") na linha " + (i+1));
+                            System.out.println("O código de função da instrução informado é inválido ou não foi implementado. (opcode: "+instrucao.opcode+" func: "+instrucao.func+") na linha " + (i+1));
                             System.exit(-1);
                     }
                     break;
                 case 3: // jal
-                    offset = (Integer.parseInt(binario.substring(7)+"00",2) - inicio) / 4;
-                    parametros = verificaLabel(labels, i+1, offset);
+                    parametros = verificaLabel(labels, i+1, instrucao.offset);
                     break;
                 case 4: // beq
-                    rs = parseHelper.translateRegister(Integer.parseInt(binario.substring(6,11),2));
-                    rt = parseHelper.translateRegister(Integer.parseInt(binario.substring(11,16),2));
-                    offset = parseHelper.trataOffset(binario.substring(16,32));
-                    parametros = rs + "," + rt + "," + verificaLabel(labels, i+1, offset);   
+                    parametros = instrucao.rs + "," + instrucao.rt + "," + verificaLabel(labels, i+1, instrucao.offset);   
                     break;
                 case 35: // lw
-                    rs = parseHelper.translateRegister(Integer.parseInt(binario.substring(6,11),2));
-                    rt = parseHelper.translateRegister(Integer.parseInt(binario.substring(11,16),2));
-                    offset = parseHelper.trataOffset(binario.substring(16,32));
-                    parametros = rt + "," + offset + "("+rs+")";
+                    parametros = instrucao.rt + "," + instrucao.offset + "("+instrucao.rs+")";
                     break;
                 case 6: // blez
-                    rs = parseHelper.translateRegister(Integer.parseInt(binario.substring(6,11),2));
-                    rt = parseHelper.translateRegister(Integer.parseInt(binario.substring(11,16),2));
-                    offset = parseHelper.trataOffset(binario.substring(16,32));
-                    parametros = rt + "," + verificaLabel(labels, i+1, offset);   
+                    parametros = instrucao.rs + "," + verificaLabel(labels, i+1, instrucao.offset);   
                     break;
                 case 13: // ori
-                    rs = parseHelper.translateRegister(Integer.parseInt(binario.substring(6,11),2));
-                    rt = parseHelper.translateRegister(Integer.parseInt(binario.substring(11,16),2));
-                    imediato = parseHelper.trataOffset(binario.substring(16,32));
-                    parametros = rt + "," + rs + "," + imediato;
+                    parametros = instrucao.rt + "," + instrucao.rs + "," + instrucao.imm;
                     break;
                 case 10: // slti
-                    rs = parseHelper.translateRegister(Integer.parseInt(binario.substring(6,11),2));
-                    rt = parseHelper.translateRegister(Integer.parseInt(binario.substring(11,16),2));
-                    imediato = parseHelper.trataOffset(binario.substring(16,32));
-                    parametros = rt + "," + rs + "," + imediato;
+                    parametros = instrucao.rt + "," + instrucao.rs + "," + instrucao.imm;
                     break;
                 default:
-                    System.out.println("O opcode da instrução informado é inválido ou não foi implementado. (opcode: "+opcode+") na linha " + (i+1));
+                    System.out.println("O opcode da instrução informado é inválido ou não foi implementado. (opcode: "+instrucao.opcode+") na linha " + (i+1));
                     System.exit(-1);
             }
             
-            sb.append(parametros);
+            sb.append(instrucao.cmd + " " + parametros);
             sb.append("\n");
         }
-        
         // adiciona labels
         StringBuilder sb2 = new StringBuilder();
         String ls[] = sb.toString().split("\n");
@@ -142,6 +100,18 @@ public class Desmontagem {
         return this.contentDesmontado;
     }
 
+    
+
+    private String verificaLabel(HashMap labels,int linhaAtual, int offset) {
+        int destino = linhaAtual + offset;
+        if(labels.containsKey(destino)) {
+            return labels.get(destino).toString();
+        } else {
+            labels.put(destino, "label"+destino);
+            return "label"+destino;
+        }
+    }
+    
     private String getInstrucao(int opcode, int func) {
         if(opcode == 0) {
             switch(func) {
@@ -175,14 +145,29 @@ public class Desmontagem {
             }
         }
     }
-
-    private String verificaLabel(HashMap labels,int linhaAtual, int offset) {
-        int destino = linhaAtual + offset;
-        if(labels.containsKey(destino)) {
-            return labels.get(destino).toString();
-        } else {
-            labels.put(destino, "label"+destino);
-            return "label"+destino;
+    
+    private Instrucao desmontaDeBinario(String binario) {
+        Instrucao instrucao = new Instrucao();
+        instrucao.opcode = parseHelper.binToInt(binario.substring(0, 6)); 
+        instrucao.func = parseHelper.binToInt(binario.substring(26, 32));
+        instrucao.cmd = getInstrucao(instrucao.opcode, instrucao.func);
+        if(instrucao.cmd == null) {
+            return null;
         }
+        
+        instrucao.rs = parseHelper.translateRegister(Integer.parseInt(binario.substring(6,11),2));
+        instrucao.rt = parseHelper.translateRegister(Integer.parseInt(binario.substring(11,16),2));
+        instrucao.rd = parseHelper.translateRegister(Integer.parseInt(binario.substring(16,21),2));
+        
+        int inicio = Integer.parseInt("400000",16); // inicio do programa 0x00400000
+        
+        if(instrucao.opcode == 3) { // jal
+            instrucao.offset = (Integer.parseInt(binario.substring(7)+"00",2) - inicio) / 4;
+        } else {
+            instrucao.offset = parseHelper.trataOffset(binario.substring(16,32));
+        }
+        instrucao.imm = parseHelper.trataOffset(binario.substring(16,32));
+        instrucao.shamt = parseHelper.trataOffset(binario.substring(21,26));
+        return instrucao;
     }
 }

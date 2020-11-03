@@ -92,7 +92,7 @@ public class ParseHelper {
         regTableInd.put(30,"$fp");
         regTableInd.put(31,"$ra");
     }
- 
+    
     public static ParseHelper getInstance() {
         if(instance == null) {
             instance = new ParseHelper();
