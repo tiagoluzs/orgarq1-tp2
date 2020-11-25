@@ -154,23 +154,36 @@ public class Desmontagem {
      */
     private String getInstrucao(int opcode, int func) {
         if(opcode == 0) {
-            return switch (func) {
-                case 39 -> "nor";
-                case 8 -> "jr";
-                case 0 -> "sll";
-                case 26 -> "div";
-                default -> null;
-            };
+            switch (func) {
+                case 39: 
+                    return "nor";
+                case 8 : 
+                    return  "jr";
+                case 0 : 
+                    return  "sll";
+                case 26 : 
+                    return  "div";
+                default : 
+                    return  null;
+            }
+            
         } else {
-            return switch (opcode) {
-                case 3 -> "jal";
-                case 10 -> "slti";
-                case 35 -> "lw";
-                case 4 -> "beq";
-                case 6 -> "blez";
-                case 13 -> "ori";
-                default -> null;
-            };
+            switch (opcode) {
+                case 3 : 
+                    return  "jal";
+                case 10 : 
+                    return  "slti";
+                case 35 : 
+                    return "lw";
+                case 4 : 
+                    return "beq";
+                case 6 : 
+                    return  "blez";
+                case 13 : 
+                    return  "ori";
+                default : 
+                    return  null;
+            }
         }
     }
     /**

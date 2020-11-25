@@ -39,9 +39,15 @@ public class Trabalho {
         // chama operações de acordo com chamada do usuário
         String operacao = args[0];
         switch(operacao) {
-            case "ajuda" -> printHelp(false);
-            case "monta" -> monta(args[1],args[2]);
-            case "desmonta" -> desmonta(args[1],args[2]);
+            case "ajuda" : 
+                printHelp(false);
+                break;
+            case "monta" : 
+                monta(args[1],args[2]);
+                break;
+            case "desmonta" : 
+                desmonta(args[1],args[2]);
+                break;
         }
     }
     
